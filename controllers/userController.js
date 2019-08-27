@@ -98,6 +98,7 @@ exports.profilePostsScreen = function(req, res) {
     //ask our post model for posts by a particular ID
     Post.findByAuthorID(req.profileUser._id).then(function(posts) {
         res.render('profile', {
+            title: `Profile for ${req.profileUser.username}`,
             counts: {postCount: req.postCount, followerCount: req.followerCount, followingCount: req.followingCount},
             currentPage: 'posts',
             isVisitorsProfile: req.isVisitorsProfile,
