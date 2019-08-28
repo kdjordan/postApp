@@ -2,6 +2,7 @@ import axios from 'axios';
 
 export default class RegistrationForm {
     constructor() {
+        this._csrf = document.querySelector('input[name="_csrf"]').value;
         this.form = document.querySelector('#registration-form');
         this.allFields = document.querySelectorAll('#registration-form .form-control');
         this.insertValidationElements();
@@ -14,6 +15,7 @@ export default class RegistrationForm {
         this.username.isUnique = false;
         this.email.isUnique = false;
         this.events();
+        
     }
 
     events() {
@@ -129,7 +131,7 @@ export default class RegistrationForm {
             this.showValidationError(this.email, "You must provide a valid email address");
         } 
         if(!this.email.errors) {
-            axios.post('/doesEmailExist', {email: this.email.value}).then((response) => {
+            axios.post('/doesEmailExist', {_csrf: this._csrf, email: this.email.value}).then((response) => {
                 if(response.data) {
                     this.showValidationError(this.email, "That email is already being used");
                     this.email.isUnique = false;
@@ -149,7 +151,7 @@ export default class RegistrationForm {
             this.showValidationError(this.username, "Username must be at least 3 characters");
         }
         if(!this.username.errors) {
-            axios.post('/doesUsernameExist', {username: this.username.value}).then((response) => {
+            axios.post('/doesUsernameExist', {_csrf: this._csrf, username: this.username.value}).then((response) => {
                 if(response.data) {
                     this.showValidationError(this.username, "That username is already taken");
                     this.username.isUnique = false;

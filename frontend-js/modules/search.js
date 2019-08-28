@@ -4,6 +4,7 @@ import DOMPurify from 'dompurify';
 export default class Search {
     //select dom elements and keep track of any useful data
     constructor() {
+        this._csrf = document.querySelector('input[name="_csrf"]').value;
         this.injectHTML();
         this.headerSearchIcon = document.querySelector('.header-search-icon');
         this.overlay = document.querySelector('.search-overlay');
@@ -54,8 +55,7 @@ export default class Search {
     }
 
     sendRequest() {
-        axios.post('/search', {searchTerm: this.inputField.value}).then(response => {
-            console.log(response.data);
+        axios.post('/search', {_csrf: this._csrf, searchTerm: this.inputField.value}).then(response => {
             this.renderResultsHTML(response.data);
         }).catch(() => {
             alert('request failed');

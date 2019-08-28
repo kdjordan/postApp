@@ -4,6 +4,7 @@ const MongoStore = require('connect-mongo')(session);
 const flash = require('connect-flash');
 const markdown = require('marked');
 const sanitizeHTML = require('sanitize-html');
+const csrf = require('csurf');
 const app = express();
 
 let sessionOptions = session({
@@ -49,6 +50,22 @@ app.use(express.json());
 app.use(express.static('public'));
 app.set('views', 'views');
 app.set('view engine', 'ejs');
+
+app.use(csrf());
+
+app.use(function(req, res, next) {
+    res.locals.csrfToken = req.csrfToken()
+    next();
+});
+
+app.use(function(err, req, res, next) {
+    if(err.code == 'EBADCSRFTOKEN') {
+        req.flash('errors', "Cross site request forgery attack detected");
+        req.session.save(() => res.redirect('/'));
+    } else {
+        req.redirect('404');
+    }
+});
 
 app.use('/', router);
 
