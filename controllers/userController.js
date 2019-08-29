@@ -1,6 +1,17 @@
 const User = require('../models/User');
 const Post = require('../models/Post');
 const Follow = require('../models/Follow');
+const jwt = require('jsonwebtoken');
+
+exports.apiGetPostsByUsername = async function(req, res) {
+    try {
+        let authorDoc = await User.findByUsername(req.params.username);
+        let posts = await Post.findByAuthorID(authorDoc._id);
+        res.json(posts);
+    } catch {
+        res.json('Sorry invalid user requested');
+    }
+}
 
 exports.sharedProfileData = async function(req, res, next) {
     let isVisitorsProfile = false;
@@ -22,6 +33,15 @@ exports.sharedProfileData = async function(req, res, next) {
     req.followingCount = followingCount;
     
     next();
+}
+
+exports.apiMustBeLoggedIn = function(req, res, next) {
+    try {
+        req.apiUser = jwt.verify(req.body.token, process.env.JWTSECRET);
+        next();
+    } catch {
+        res.json('Sorry, you must provide a valid token');
+    }
 }
 
 exports.mustBeLoggedIn = function(req, res, next) {
@@ -47,6 +67,16 @@ exports.login = function(req, res) {
         req.session.save(function() {
             res.redirect('/');
         }); 
+    });
+}
+
+exports.apiLogin = function(req, res) {
+    let user = new User(req.body);
+    user.login().then(function(result) {
+        res.json(jwt.sign({_id: user.data._id}, process.env.JWTSECRET, {expiresIn: '30d'}));
+    
+    }).catch(function(err) {
+        res.json('Sorry, your values are not correct');
     });
 }
 
@@ -160,4 +190,5 @@ exports.doesEmailExist = async function(req, res) {
     let emailBool = await User.doesEmailExist(req.body.email);
     res.json(emailBool);
 } 
+
 
