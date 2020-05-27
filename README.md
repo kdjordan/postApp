@@ -1,6 +1,6 @@
 # The Blog App
 
-> NodeJs and VanillJS Udemy class project
+> NodeJs and VanillaJS Udemy class project
 
 ## The Story
 
